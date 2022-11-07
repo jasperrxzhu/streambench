@@ -46,13 +46,13 @@ int main(int argc, char** argv)
     double time = 0;
 
     if (testcase == "select") {
-        SelectBench bench(period, size);
+        ParallelSelectBench bench(threads, period, size);
         time = bench.run();
     } else if (testcase == "where") {
-        WhereBench bench(period, size);
+        ParallelWhereBench bench(threads, period, size);
         time = bench.run();
     } else if (testcase == "aggregate") {
-        AggregateBench bench(period, size, 1000 * period);
+        ParallelAggregateBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "alterdur") {
         AlterDurBench bench(3, 2, size);

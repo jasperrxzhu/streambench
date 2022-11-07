@@ -63,4 +63,14 @@ private:
     dur_t period;
 };
 
+class ParallelSelectBench : public ParallelBenchmark {
+public:
+    ParallelSelectBench(int threads, dur_t period, int64_t size)
+    {
+        for (int i = 0; i < threads; i++) {
+            benchs.push_back(new SelectBench(period, size));
+        }
+    }
+};
+
 #endif  // TILT_BENCH_INCLUDE_TILT_SELECT_H_

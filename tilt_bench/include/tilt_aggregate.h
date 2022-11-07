@@ -51,4 +51,14 @@ private:
     int64_t w;
 };
 
+class ParallelAggregateBench : public ParallelBenchmark {
+public:
+    ParallelAggregateBench(int threads, dur_t period, int64_t size, int64_t w)
+    {
+        for (int i = 0; i < threads; i++) {
+            benchs.push_back(new AggregateBench(period, size, w));
+        }
+    }
+};
+
 #endif  // TILT_BENCH_INCLUDE_TILT_AGGREGATE_H_

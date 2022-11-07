@@ -51,4 +51,14 @@ private:
     dur_t period;
 };
 
+class ParallelWhereBench : public ParallelBenchmark {
+public:
+    ParallelWhereBench(int threads, dur_t period, int64_t size)
+    {
+        for (int i = 0; i < threads; i++) {
+            benchs.push_back(new WhereBench(period, size));
+        }
+    }
+};
+
 #endif  // TILT_BENCH_INCLUDE_TILT_WHERE_H_
