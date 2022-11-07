@@ -20,6 +20,12 @@ add_definitions(${LLVM_DEFINITIONS})
 llvm_map_components_to_libnames(llvm_libs native orcjit mcjit objcarcopts)
 set(easyjit_lib "${CMAKE_BINARY_DIR}/tilt/third_party/easy_jit/bin/EasyJitPass.so")
 
+option(PRINT_REGION "Option description" OFF)
+if(PRINT_REGION)
+    message(STATUS "PRINT_REGION Flag ON")
+    add_compile_definitions(_PRINT_REGION_)
+endif()
+
 add_subdirectory(tilt/tilt)
 
 add_executable(main main.cpp)

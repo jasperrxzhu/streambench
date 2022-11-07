@@ -39,6 +39,10 @@ private:
 
     void release() final
     {
+#ifdef _PRINT_REGION_
+        print_reg<float>(&in_reg, "agg_in_reg.txt");
+        print_reg<float>(&out_reg, "agg_out_reg.txt");
+#endif
         release_reg(&in_reg);
         release_reg(&out_reg);
     }

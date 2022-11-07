@@ -5,11 +5,13 @@
 #include <cstdlib>
 #include <chrono>
 #include <thread>
+#include <fstream>
 
 #include "tilt/codegen/loopgen.h"
 #include "tilt/codegen/llvmgen.h"
 #include "tilt/codegen/vinstr.h"
 #include "tilt/engine/engine.h"
+#include "tilt/codegen/printer.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -132,6 +134,40 @@ public:
     {
         delete [] reg->tl;
         delete [] reg->data;
+    }
+
+#ifdef _PRINT_REGION_
+    template<typename T>
+    void print_reg(region_t* reg, string fname)
+    {
+        ofstream f;
+        f.open( fname );
+
+        auto data = reinterpret_cast<T*>(reg->data);
+        idx_t end = get_end_idx(reg);
+
+        for (int i = 0; i <= end; i++) {
+            auto* ptr = data + i;
+            if(ptr) {
+                f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << *ptr << endl;
+            }
+        }
+
+        f.close();
+    }
+#endif // _PRINT_REGION_
+
+    void print_loopIR( string fname )
+    {
+        auto query_op = query();
+        auto query_op_sym = _sym("query", query_op);
+
+        auto loop = LoopGen::Build(query_op_sym, query_op.get());
+
+        ofstream f;
+        f.open(fname);
+        f << IRPrinter::Build(loop);
+        f.close();
     }
 
     virtual Op query() = 0;

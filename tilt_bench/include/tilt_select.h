@@ -52,6 +52,10 @@ private:
 
     void release() final
     {
+#ifdef _PRINT_REGION_
+        print_reg<float>(&in_reg, "select_in_reg.txt");
+        print_reg<float>(&out_reg, "select_out_reg.txt");
+#endif
         release_reg(&in_reg);
         release_reg(&out_reg);
     }

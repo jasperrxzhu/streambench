@@ -48,12 +48,21 @@ int main(int argc, char** argv)
     if (testcase == "select") {
         ParallelSelectBench bench(threads, period, size);
         time = bench.run();
+    } else if (testcase == "select_loopIR") {
+        SelectBench bench(period, size);
+        bench.print_loopIR("select_loopIR.txt");
     } else if (testcase == "where") {
         ParallelWhereBench bench(threads, period, size);
         time = bench.run();
+    } else if (testcase == "where_loopIR") {
+        WhereBench bench(period, size);
+        bench.print_loopIR("where_loopIR.txt");
     } else if (testcase == "aggregate") {
         ParallelAggregateBench bench(threads, period, size, 1000 * period);
         time = bench.run();
+    } else if (testcase == "aggregate_loopIR") {
+        AggregateBench bench(period, size, 1000 * period);
+        bench.print_loopIR("agg_loopIR.txt");
     } else if (testcase == "alterdur") {
         AlterDurBench bench(3, 2, size);
         time = bench.run();
