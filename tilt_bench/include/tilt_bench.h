@@ -124,7 +124,7 @@ public:
     {
         region_t reg;
         auto buf_size = get_buf_size(size);
-        auto tl = new ival_t[buf_size];
+        auto tl = new ts_t[buf_size];
         auto data = new T[buf_size];
         init_region(&reg, 0, buf_size, tl, reinterpret_cast<char*>(data));
         return reg;
@@ -149,7 +149,7 @@ public:
         for (int i = 0; i <= end; i++) {
             auto* ptr = data + i;
             if(ptr) {
-                f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << *ptr << endl;
+                f << reg->tl[i] << ' ' << *ptr << endl;
             }
         }
 

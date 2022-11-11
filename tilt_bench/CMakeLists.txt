@@ -26,6 +26,15 @@ if(PRINT_REGION)
     add_compile_definitions(_PRINT_REGION_)
 endif()
 
+# if this option is ON, region_t objects will have an additional variable
+#   to record the period of the stream
+#   otherwise, all vinstrs will always add 1 to the start ts to get end ts
+option(REGION_PERIOD "Option description" OFF)
+if(REGION_PERIOD)
+    message(STATUS "REGION_PERIOD Flag ON")
+    add_compile_definitions(_REGION_PERIOD_)
+endif()
+
 add_subdirectory(tilt/tilt)
 
 add_executable(main main.cpp)
