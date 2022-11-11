@@ -6,6 +6,7 @@
 #include <chrono>
 #include <thread>
 #include <fstream>
+#include <iostream>
 
 #include "tilt/codegen/loopgen.h"
 #include "tilt/codegen/llvmgen.h"
@@ -173,6 +174,43 @@ public:
     virtual Op query() = 0;
     virtual void execute(intptr_t) = 0;
 };
+
+#ifdef _PRINT_REGION_
+template<>
+void Benchmark::print_reg<int64_t>(region_t* reg, string fname)
+{
+    cout << "Printing" << endl;
+    ofstream f;
+    f.open( fname );
+
+    // auto data = reinterpret_cast<int8_t*>(reg->data);
+    idx_t end = get_end_idx(reg);
+    cout << end << endl;
+
+    for (int i = 0; i <= end; i++) {
+        // auto* ptr = data + i;
+        auto* ptr = reinterpret_cast<int8_t*>(fetch(reg, i+1, i, 1));
+        if(ptr) {
+            f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << (int)(*ptr) << endl;
+        }
+    }
+
+    f.close();
+}
+#endif // _PRINT_REGION_
+
+#ifdef _NOT_PACKED_
+template<>
+region_t Benchmark::create_reg<int8_t>(int64_t size)
+{
+    region_t reg;
+    auto buf_size = get_buf_size(size);
+    auto tl = new ival_t[buf_size];
+    auto data = new int64_t[buf_size];
+    init_region(&reg, 0, buf_size, tl, reinterpret_cast<char*>(data));
+    return reg;
+}
+#endif // _NOT_PACKED_
 
 class ParallelBenchmark {
 public:

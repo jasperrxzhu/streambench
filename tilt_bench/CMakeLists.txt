@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13.4)
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_C_COMPILER /h/174/jasperrxzhu/llvm-project-11.0.0/build/bin/clang)
+set(CMAKE_CXX_COMPILER /h/174/jasperrxzhu/llvm-project-11.0.0/build/bin/clang++)
 
 project(tilt_bench)
 
@@ -24,6 +24,12 @@ option(PRINT_REGION "Option description" OFF)
 if(PRINT_REGION)
     message(STATUS "PRINT_REGION Flag ON")
     add_compile_definitions(_PRINT_REGION_)
+endif()
+
+option(NOT_PACKED "Option description" OFF)
+if(NOT_PACKED)
+    message(STATUS "NOT_PACKED Flag ON")
+    add_compile_definitions(_NOT_PACKED_)
 endif()
 
 add_subdirectory(tilt/tilt)
