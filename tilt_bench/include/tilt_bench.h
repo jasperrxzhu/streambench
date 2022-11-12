@@ -170,6 +170,23 @@ public:
         f.close();
     }
 
+    void print_llvmIR( string fname )
+    {
+        auto query_op = query();
+        auto query_op_sym = _sym("query", query_op);
+
+        auto loop = LoopGen::Build(query_op_sym, query_op.get());
+
+        auto jit = ExecEngine::Get();
+        auto& llctx = jit->GetCtx();
+        auto llmod = LLVMGen::Build(loop, llctx);
+
+        ofstream f;
+        f.open( fname );
+        f << IRPrinter::Build( move( llmod ) );
+        f.close();
+    }
+
     virtual Op query() = 0;
     virtual void execute(intptr_t) = 0;
 };
