@@ -3,6 +3,7 @@
 #include <sys/resource.h>
 
 #include "tilt_select.h"
+/*
 #include "tilt_where.h"
 #include "tilt_aggregate.h"
 #include "tilt_alterdur.h"
@@ -18,6 +19,7 @@
 #include "tilt_kurt.h"
 #include "tilt_eg.h"
 #include "tilt_yahoo.h"
+*/
 
 using namespace std;
 
@@ -54,7 +56,16 @@ int main(int argc, char** argv)
     } else if (testcase == "select_llvmIR") {
         SelectBench bench(period, size);
         bench.print_llvmIR("select_llvmIR.txt");
-    } else if (testcase == "where") {
+    } else if (testcase == "bdselect") {
+        ParallelBDSelectBench bench(threads, period, size, 5);
+        time = bench.run();
+    } else if (testcase == "bdselect_loopIR") {
+        BDSelectBench bench(period, size, 100);
+        bench.print_loopIR("bdselect_loopIR.txt");
+    } else if (testcase == "bdselect_llvmIR") {
+        BDSelectBench bench(period, size, 100);
+        bench.print_llvmIR("bdselect_llvmIR.txt");
+    } /* else if (testcase == "where") {
         ParallelWhereBench bench(threads, period, size);
         time = bench.run();
     } else if (testcase == "where_loopIR") {
@@ -129,7 +140,7 @@ int main(int argc, char** argv)
     } else if (testcase == "yahoo") {
         ParallelYahooBench bench(threads, period, 100 * period, size);
         time = bench.run();
-    } else {
+    } */ else {
         throw runtime_error("Invalid testcase");
     }
 

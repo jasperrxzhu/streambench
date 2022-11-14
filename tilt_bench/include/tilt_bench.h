@@ -18,6 +18,8 @@ using namespace std::chrono;
 using namespace tilt;
 using namespace tilt::tilder;
 
+/*** uncompressed Dataset and derived classes ***/
+
 template<typename T>
 class Dataset {
 public:
@@ -82,6 +84,46 @@ private:
     int64_t len;
 };
 
+/*** Base-Delta compressed Dataset and derived classes ***/
+
+template<typename Tbase, typename Tdelta>
+class BDDataset {
+public:
+    virtual void fill(bd_region_t*) = 0;
+};
+
+template<typename Tbase, typename Tdelta>
+class SynthBDData : public BDDataset<Tbase, Tdelta>{
+public:
+    SynthBDData(dur_t period, int64_t len) : period(period), len(len) {}
+
+    void fill(bd_region_t* bd_reg) final
+    {
+        double base_range = 100;
+        double delta_range = 100;
+        auto block_size = bd_reg->block_size;
+
+        for(int i = 0; i < len; i++){
+            auto t = period * (i + 1);
+            if(i % block_size == 0) {
+                commit_block(bd_reg, i, true);
+                auto* base_ptr = reinterpret_cast<Tbase*>(fetch_base(bd_reg, i, sizeof(Tbase)));
+                *base_ptr = static_cast<Tbase>(rand() / static_cast<double>(RAND_MAX / base_range)) - (base_range / 2);;
+            }
+            bd_commit_data(bd_reg, t);
+            auto* ptr = reinterpret_cast<Tdelta*>(fetch_delta(bd_reg, t, i, sizeof(Tdelta)));
+            *ptr = static_cast<Tdelta>(rand() / static_cast<double>(RAND_MAX / delta_range)) - (delta_range / 2);;
+        }
+        
+    }
+
+private:
+    dur_t period;
+    int64_t len;
+};
+
+
+/*** Benchmark and derived classes ***/
 
 class Benchmark {
 public:
@@ -130,10 +172,32 @@ public:
         return reg;
     }
 
+    template<typename Tbase, typename Tdelta>
+    static bd_region_t create_bd_reg(int64_t size, uint32_t block_size)
+    {
+        bd_region_t bd_reg;
+        auto buf_size = get_buf_size(size);
+        auto tl = new ival_t[buf_size];
+        auto data = new Tbase[buf_size];
+        auto delta_data = new Tdelta[buf_size];
+        auto cmp_map = new bool[buf_size / block_size];
+        init_bd_region(&bd_reg, 0, buf_size, tl, reinterpret_cast<char*>(data),
+                       block_size, reinterpret_cast<char*>(delta_data), cmp_map);
+        return bd_reg;
+    }
+
     static void release_reg(region_t* reg)
     {
         delete [] reg->tl;
         delete [] reg->data;
+    }
+
+    static void release_bd_reg(bd_region_t* bd_reg)
+    {
+        delete [] bd_reg->tl;
+        delete [] bd_reg->data;
+        delete [] bd_reg->delta_data;
+        delete [] bd_reg->cmp_map;
     }
 
 #ifdef _PRINT_REGION_
@@ -143,13 +207,41 @@ public:
         ofstream f;
         f.open( fname );
 
-        auto data = reinterpret_cast<T*>(reg->data);
+        auto* data = reinterpret_cast<T*>(reg->data);
         idx_t end = get_end_idx(reg);
 
         for (int i = 0; i <= end; i++) {
             auto* ptr = data + i;
             if(ptr) {
                 f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << *ptr << endl;
+            }
+        }
+
+        f.close();
+    }
+
+    template<typename Tbase, typename Tdelta>
+    void print_bd_reg(bd_region_t* bd_reg, string fname)
+    {
+        ofstream f;
+        f.open(fname);
+
+        auto* base_data = reinterpret_cast<Tbase*>(bd_reg->data);
+        auto* delta_data = reinterpret_cast<Tdelta*>(bd_reg->delta_data);
+        auto end = get_end_idx(bd_reg);
+
+        f << "Bases:" << endl;
+        for(int i = 0; i <= end; i++){
+            f << base_data[i] << endl;
+        }
+
+        f << "Deltas:" << endl;
+        for (int i = 0; i <= end; i++) {
+            auto* ptr = delta_data + i;
+            if(ptr) {
+                auto* base_ptr = reinterpret_cast<Tbase*>(fetch_base(bd_reg, i, sizeof(Tbase)));
+                f << bd_reg->tl[i].t << ' ' << bd_reg->tl[i].d << ' ' 
+                  << *base_ptr << ' ' << (int)*ptr << endl;
             }
         }
 

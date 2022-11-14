@@ -7,6 +7,8 @@
 using namespace tilt;
 using namespace tilt::tilder;
 
+/*** Select Operator ***/
+
 Op _Select(_sym in, function<Expr(_sym)> selector)
 {
     auto e = in[_pt(0)];
@@ -21,6 +23,8 @@ Op _Select(_sym in, function<Expr(_sym)> selector)
         res_sym);
     return sel_op;
 }
+
+/*** Uncompressed Select Benchmark and related classes ***/
 
 class SelectBench : public Benchmark {
 public:
@@ -73,6 +77,67 @@ public:
     {
         for (int i = 0; i < threads; i++) {
             benchs.push_back(new SelectBench(period, size));
+        }
+    }
+};
+
+/*** Base-Delta compressed Select Benchmark and related classes ***/
+
+class BDSelectBench : public Benchmark {
+public:
+    BDSelectBench(dur_t period, int64_t size, uint32_t block_size) :
+        period(period), size(size), block_size(block_size)
+    {}
+
+private:
+    Op query() final
+    /* change tilt::Type after BaseDelta has been implemented in the TiLT branch*/
+    {
+        auto in_sym = _sym("in", tilt::Type(types::FLOAT32, _iter(0, -1)));
+        return _Select(in_sym, [](_sym in) { return in + _f32(3); });
+    }
+
+    void init() final
+    {
+        in_reg = create_bd_reg<int64_t, int8_t>(size, block_size);
+        out_reg = create_reg<int64_t>(size);
+
+        SynthBDData<int64_t, int8_t> dataset(period, size);
+        dataset.fill(&in_reg);
+    }
+
+    void execute(intptr_t addr) final
+    {
+        /*
+        auto query = (region_t* (*)(ts_t, ts_t, region_t*, bd_region_t*)) addr;
+        query(0, period * size, &out_reg, &in_reg);
+        */
+    }
+
+    void release() final
+    {
+#ifdef _PRINT_REGION_
+        print_bd_reg<int64_t, int8_t>(&in_reg, "bd_select_in_reg.txt");
+        print_reg<int64_t>(&out_reg, "bd_select_out_reg.txt");
+#endif
+        release_bd_reg(&in_reg);
+        release_reg(&out_reg);
+    }
+
+    bd_region_t in_reg;
+    region_t out_reg;
+
+    dur_t period;
+    int64_t size;
+    uint32_t block_size;
+};
+
+class ParallelBDSelectBench : public ParallelBenchmark {
+public:
+    ParallelBDSelectBench(int threads, dur_t period, int64_t size, uint32_t block_size)
+    {
+        for (int i = 0; i < threads; i++) {
+            benchs.push_back(new BDSelectBench(period, size, block_size));
         }
     }
 };
