@@ -91,10 +91,9 @@ public:
 
 private:
     Op query() final
-    /* change tilt::Type after BaseDelta has been implemented in the TiLT branch*/
     {
-        auto in_sym = _sym("in", tilt::Type(types::FLOAT32, _iter(0, -1)));
-        return _Select(in_sym, [](_sym in) { return in + _f32(3); });
+        auto in_sym = _sym("in", tilt::Type(types::BASEDELTA<int64_t, int8_t>(), _iter(0, -1)));
+        return _Select(in_sym, [](_sym in) { return in + _i64(3); });
     }
 
     void init() final
