@@ -45,7 +45,7 @@ Expr _Count(_sym win)
 Expr _Sum(_sym win)
 {
     auto acc = [](Expr s, Expr st, Expr et, Expr d) { return _add(s, d); };
-    return _red(win, _f32(0), acc);
+    return _red(win, _i64(0), acc);
 }
 
 Op _WindowSum(_sym in, int64_t w, int64_t p)

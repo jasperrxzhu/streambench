@@ -57,7 +57,7 @@ int main(int argc, char** argv)
         SelectBench bench(period, size);
         bench.print_llvmIR("select_llvmIR.txt");
     } else if (testcase == "bdselect") {
-        ParallelBDSelectBench bench(threads, period, size, 5);
+        ParallelBDSelectBench bench(threads, period, size, 100);
         time = bench.run();
     } else if (testcase == "bdselect_loopIR") {
         BDSelectBench bench(period, size, 100);
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
         WhereBench bench(period, size);
         bench.print_llvmIR("where_llvmIR.txt");
     } else if (testcase == "bdwhere") {
-        ParallelBDWhereBench bench(threads, period, size, 5);
+        ParallelBDWhereBench bench(threads, period, size, 100);
         time = bench.run();
     } else if (testcase == "bdwhere_loopIR") {
         BDWhereBench bench(period, size, 100);
@@ -83,7 +83,7 @@ int main(int argc, char** argv)
     } else if (testcase == "bdwhere_llvmIR") {
         BDWhereBench bench(period, size, 100);
         bench.print_llvmIR("bdwhere_llvmIR.txt");
-    } /* else if (testcase == "aggregate") {
+    } else if (testcase == "aggregate") {
         ParallelAggregateBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "aggregate_loopIR") {
@@ -92,7 +92,16 @@ int main(int argc, char** argv)
     } else if (testcase == "aggregate_llvmIR") {
         AggregateBench bench(period, size, 1000 * period);
         bench.print_llvmIR("agg_llvmIR.txt");
-    } else if (testcase == "alterdur") {
+    } else if (testcase == "bdagg") {
+        ParallelBDAggregateBench bench(threads, period, size, 1000 * period, 100);
+        time = bench.run();
+    } else if (testcase == "bdagg_loopIR") {
+        BDAggregateBench bench(period, size, 1000 * period, 100);
+        bench.print_loopIR("bdagg_loopIR.txt");
+    } else if (testcase == "bdagg_llvmIR") {
+        BDAggregateBench bench(period, size, 1000 * period, 100);
+        bench.print_llvmIR("bdagg_llvmIR.txt");
+    } /* else if (testcase == "alterdur") {
         AlterDurBench bench(3, 2, size);
         time = bench.run();
     } else if (testcase == "innerjoin") {
