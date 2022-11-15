@@ -35,16 +35,16 @@ public:
 private:
     Op query() final
     {
-        auto in_sym = _sym("in", tilt::Type(types::FLOAT32, _iter(0, -1)));
-        return _Select(in_sym, [](_sym in) { return in + _f32(3); });
+        auto in_sym = _sym("in", tilt::Type(types::INT64, _iter(0, -1)));
+        return _Select(in_sym, [](_sym in) { return in + _i64(3); });
     }
 
     void init() final
     {
-        in_reg = create_reg<float>(size);
-        out_reg = create_reg<float>(size);
+        in_reg = create_reg<int64_t>(size);
+        out_reg = create_reg<int64_t>(size);
 
-        SynthData<float> dataset(period, size);
+        SynthData<int64_t> dataset(period, size);
         dataset.fill(&in_reg);
     }
 
@@ -57,8 +57,8 @@ private:
     void release() final
     {
 #ifdef _PRINT_REGION_
-        print_reg<float>(&in_reg, "select_in_reg.txt");
-        print_reg<float>(&out_reg, "select_out_reg.txt");
+        print_reg<int64_t>(&in_reg, "select_in_reg.txt");
+        print_reg<int64_t>(&out_reg, "select_out_reg.txt");
 #endif
         release_reg(&in_reg);
         release_reg(&out_reg);
@@ -107,17 +107,15 @@ private:
 
     void execute(intptr_t addr) final
     {
-        /*
         auto query = (region_t* (*)(ts_t, ts_t, region_t*, bd_region_t*)) addr;
         query(0, period * size, &out_reg, &in_reg);
-        */
     }
 
     void release() final
     {
 #ifdef _PRINT_REGION_
-        print_bd_reg<int64_t, int8_t>(&in_reg, "bd_select_in_reg.txt");
-        print_reg<int64_t>(&out_reg, "bd_select_out_reg.txt");
+        print_bd_reg<int64_t, int8_t>(&in_reg, "bdselect_in_reg.txt");
+        print_reg<int64_t>(&out_reg, "bdselect_out_reg.txt");
 #endif
         release_bd_reg(&in_reg);
         release_reg(&out_reg);

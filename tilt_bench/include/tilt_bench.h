@@ -241,6 +241,7 @@ public:
             if(ptr) {
                 auto* base_ptr = reinterpret_cast<Tbase*>(fetch_base(bd_reg, i, sizeof(Tbase)));
                 f << bd_reg->tl[i].t << ' ' << bd_reg->tl[i].d << ' ' 
+                  << (bool)*fetch_cmp(bd_reg, bd_reg->tl[i].t+1, i) << ' '
                   << *base_ptr << ' ' << (int)*ptr << endl;
             }
         }

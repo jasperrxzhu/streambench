@@ -3,9 +3,9 @@
 #include <sys/resource.h>
 
 #include "tilt_select.h"
-/*
 #include "tilt_where.h"
 #include "tilt_aggregate.h"
+/*
 #include "tilt_alterdur.h"
 #include "tilt_innerjoin.h"
 #include "tilt_outerjoin.h"
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     } else if (testcase == "bdselect_llvmIR") {
         BDSelectBench bench(period, size, 100);
         bench.print_llvmIR("bdselect_llvmIR.txt");
-    } /* else if (testcase == "where") {
+    } else if (testcase == "where") {
         ParallelWhereBench bench(threads, period, size);
         time = bench.run();
     } else if (testcase == "where_loopIR") {
@@ -74,7 +74,16 @@ int main(int argc, char** argv)
     } else if (testcase == "where_llvmIR") {
         WhereBench bench(period, size);
         bench.print_llvmIR("where_llvmIR.txt");
-    } else if (testcase == "aggregate") {
+    } else if (testcase == "bdwhere") {
+        ParallelBDWhereBench bench(threads, period, size, 5);
+        time = bench.run();
+    } else if (testcase == "bdwhere_loopIR") {
+        BDWhereBench bench(period, size, 100);
+        bench.print_loopIR("bdwhere_loopIR.txt");
+    } else if (testcase == "bdwhere_llvmIR") {
+        BDWhereBench bench(period, size, 100);
+        bench.print_llvmIR("bdwhere_llvmIR.txt");
+    } /* else if (testcase == "aggregate") {
         ParallelAggregateBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "aggregate_loopIR") {
