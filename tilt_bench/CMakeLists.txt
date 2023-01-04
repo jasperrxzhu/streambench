@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13.4)
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_C_COMPILER /home/jasperzhu/llvm-project-11.0.0/build/bin/clang)
+set(CMAKE_CXX_COMPILER /home/jasperzhu/llvm-project-11.0.0/build/bin/clang++)
 
 project(tilt_bench)
 

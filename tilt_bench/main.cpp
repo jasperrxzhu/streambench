@@ -78,6 +78,12 @@ int main(int argc, char** argv)
     } else if (testcase == "innerjoin") {
         InnerJoinBench bench(period, period, size);
         time = bench.run();
+    } else if (testcase == "innerjoin_loopIR") {
+        InnerJoinBench bench(period, period, size);
+        bench.print_loopIR("innerjoin_loopIR.txt");
+    } else if (testcase == "innerjoin_llvmIR") {
+        InnerJoinBench bench(period, period, size);
+        bench.print_llvmIR("innerjoin_llvmIR.txt");
     } else if (testcase == "outerjoin") {
         OuterJoinBench bench(period, period, size);
         time = bench.run();
