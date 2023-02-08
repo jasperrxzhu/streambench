@@ -26,6 +26,12 @@ if(PRINT_REGION)
     add_compile_definitions(_PRINT_REGION_)
 endif()
 
+option(TS_COMP "Option description" OFF)
+if(TS_COMP)
+    message(STATUS "TS_COMP Flag ON")
+    add_compile_definitions(_TS_COMP_)
+endif()
+
 add_subdirectory(tilt/tilt)
 
 add_executable(main main.cpp)

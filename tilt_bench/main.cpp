@@ -5,7 +5,9 @@
 #include "tilt_select.h"
 #include "tilt_where.h"
 #include "tilt_aggregate.h"
+#include "tilt_average.h"
 #include "tilt_alterdur.h"
+#include "tilt_sliding_sum.h"
 #include "tilt_innerjoin.h"
 #include "tilt_outerjoin.h"
 #include "tilt_norm.h"
@@ -18,6 +20,8 @@
 #include "tilt_kurt.h"
 #include "tilt_eg.h"
 #include "tilt_yahoo.h"
+#include "bd_tilt_select.h"
+#include "bd_tilt_where.h"
 
 using namespace std;
 
@@ -48,6 +52,12 @@ int main(int argc, char** argv)
     if (testcase == "select") {
         ParallelSelectBench bench(threads, period, size);
         time = bench.run();
+    } else if (testcase == "select64") {
+        ParallelSelect64Bench bench(threads, period, size);
+        time = bench.run();
+    } else if (testcase == "select8") {
+        ParallelSelect8Bench bench(threads, period, size);
+        time = bench.run();
     } else if (testcase == "select_loopIR") {
         SelectBench bench(period, size);
         bench.print_loopIR("select_loopIR.txt");
@@ -56,6 +66,12 @@ int main(int argc, char** argv)
         bench.print_llvmIR("select_llvmIR.txt");
     } else if (testcase == "where") {
         ParallelWhereBench bench(threads, period, size);
+        time = bench.run();
+    } else if (testcase == "where64") {
+        ParallelWhere64Bench bench(threads, period, size);
+        time = bench.run();
+    } else if (testcase == "where8") {
+        ParallelWhere8Bench bench(threads, period, size);
         time = bench.run();
     } else if (testcase == "where_loopIR") {
         WhereBench bench(period, size);
@@ -69,12 +85,39 @@ int main(int argc, char** argv)
     } else if (testcase == "aggregate_loopIR") {
         AggregateBench bench(period, size, 1000 * period);
         bench.print_loopIR("agg_loopIR.txt");
+    } else if (testcase == "avg") {
+        ParallelAverageBench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "avg_loopIR") {
+        AverageBench bench(period, size, 1000 * period);
+        bench.print_loopIR("avg_loopIR.txt");
+    } else if (testcase == "avgonepass") {
+        ParallelAverageOnePassBench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "avgonepass_loopIR") {
+        AverageOnePassBench bench(period, size, 1000 * period);
+        bench.print_loopIR("avgonepass_loopIR.txt");
     } else if (testcase == "aggregate_llvmIR") {
         AggregateBench bench(period, size, 1000 * period);
         bench.print_llvmIR("agg_llvmIR.txt");
-    } else if (testcase == "alterdur") {
+    } else if (testcase == "naivesum") {
+        ParallelNaiveSlidingSumBench bench(threads, period, size);
+        time = bench.run();
+    } else if (testcase == "naivesum_loopIR") {
+        NaiveSlidingSumBench bench(period, size);
+        bench.print_loopIR("naivesum_loopIR.txt");
+    } else if (testcase == "incsum") {
+        ParallelIncSlidingSumBench bench(threads, period, size);
+        time = bench.run();
+    } else if (testcase == "incsum_loopIR") {
+        IncSlidingSumBench bench(period, size);
+        bench.print_loopIR("incsum_loopIR.txt");
+    }  else if (testcase == "alterdur") {
         AlterDurBench bench(3, 2, size);
         time = bench.run();
+    } else if (testcase == "alterdur_loopIR") {
+        AlterDurBench bench(3, 2, size);
+        bench.print_loopIR("alterdur_loopIR.txt");
     } else if (testcase == "innerjoin") {
         InnerJoinBench bench(period, period, size);
         time = bench.run();
@@ -99,6 +142,9 @@ int main(int argc, char** argv)
     } else if (testcase == "algotrading") {
         ParallelMOCABench bench(threads, period, 20, 50, 100, size);
         time = bench.run();
+    } else if (testcase == "moca_loopIR") {
+        MOCABench bench(period, 20, 50, 100, size);
+        bench.print_loopIR("moca_loopIR.txt");
     } else if (testcase == "rsi") {
         ParallelRSIBench bench(threads, period, 14, 100, size);
         time = bench.run();
@@ -132,9 +178,30 @@ int main(int argc, char** argv)
     } else if (testcase == "eg7") {
         Eg7Bench bench(period, size, 10, 20, size);
         time = bench.run();
+    } else if (testcase == "eg1_loopIR") {
+        Eg1Bench bench(period, size, 10, 20, size);
+        bench.print_loopIR("eg1_loopIR.txt");
+    } else if (testcase == "eg2_loopIR") {
+        Eg2Bench bench(period, size, 10, 20, size);
+        bench.print_loopIR("eg2_loopIR.txt");
+    } else if (testcase == "eg7_loopIR") {
+        Eg7Bench bench(period, size, 10, 20, size);
+        bench.print_loopIR("eg7_loopIR.txt");
     } else if (testcase == "yahoo") {
         ParallelYahooBench bench(threads, period, 100 * period, size);
         time = bench.run();
+    } else if (testcase == "bdselect") {
+        ParallelBDSelectBench bench(threads, period, 100 * period, size);
+        time = bench.run();
+    } else if (testcase == "bdselect_loopIR") {
+        BDSelectBench bench(period, 100 * period, size);
+        bench.print_loopIR("bdselect_loopIR.txt");
+    } else if (testcase == "bdwhere") {
+        ParallelBDWhereBench bench(threads, period, 100 * period, size);
+        time = bench.run();
+    } else if (testcase == "bdwhere_loopIR") {
+        BDWhereBench bench(period, 100 * period, size);
+        bench.print_loopIR("bdwhere_loopIR.txt");
     } else {
         throw runtime_error("Invalid testcase");
     }

@@ -97,6 +97,23 @@ Expr _Average(_sym win, function<Expr(Expr)> selector)
     return _red(win, _new(vector<Expr>{_f32(0), _f32(0)}), acc);
 }
 
+Op _WindowAvgOnePass(_sym in, int64_t w)
+{
+    auto window = in[_win(-w, 0)];
+    auto window_sym = _sym("win", window);
+    auto avg_state = _Average(window_sym, [](Expr e) { return e; });
+    auto avg_state_sym = _sym("avg_state", avg_state);
+    auto avg = _div(_get(avg_state_sym, 0), _get(avg_state_sym, 1));
+    auto avg_sym = _sym("avg", avg);
+    auto wc_op = _op(
+        _iter(0, w),
+        Params{ in },
+        SymTable{ {window_sym, window}, {avg_state_sym, avg_state}, {avg_sym, avg} },
+        _true(),
+        avg_sym);
+    return wc_op;
+}
+
 Op _Join(_sym left, _sym right, function<Expr(_sym, _sym)> op)
 {
     auto e_left = left[_pt(0)];
