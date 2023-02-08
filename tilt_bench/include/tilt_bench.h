@@ -124,15 +124,17 @@ public:
     {
         region_t reg;
         auto buf_size = get_buf_size(size);
-        auto tl = new ival_t[buf_size];
+        auto tl_ts = new ts_t[buf_size];
+        auto tl_d = new dur_t[buf_size];
         auto data = new T[buf_size];
-        init_region(&reg, 0, buf_size, tl, reinterpret_cast<char*>(data));
+        init_region(&reg, 0, buf_size, tl_ts, tl_d, reinterpret_cast<char*>(data));
         return reg;
     }
 
     static void release_reg(region_t* reg)
     {
-        delete [] reg->tl;
+        delete [] reg->tl_ts;
+        delete [] reg->tl_d;
         delete [] reg->data;
     }
 
@@ -149,7 +151,7 @@ public:
         for (int i = 0; i <= end; i++) {
             auto* ptr = data + i;
             if(ptr) {
-                f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << *ptr << endl;
+                f << reg->tl_ts[i] << ' ' << reg->tl_d[i] << ' ' << *ptr << endl;
             }
         }
 
