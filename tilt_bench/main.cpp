@@ -20,8 +20,11 @@
 #include "tilt_kurt.h"
 #include "tilt_eg.h"
 #include "tilt_yahoo.h"
+
 #include "bd_tilt_select.h"
 #include "bd_tilt_where.h"
+
+#include "bdopt_tilt_sum.h"
 
 using namespace std;
 
@@ -80,7 +83,7 @@ int main(int argc, char** argv)
         WhereBench bench(period, size);
         bench.print_llvmIR("where_llvmIR.txt");
     } else if (testcase == "aggregate") {
-        ParallelAggregateBench bench(threads, period, size, 1000 * period);
+        ParallelAggregateBench bench(threads, period, size, 10 * period);
         time = bench.run();
     } else if (testcase == "aggregate_loopIR") {
         AggregateBench bench(period, size, 1000 * period);
@@ -202,6 +205,12 @@ int main(int argc, char** argv)
     } else if (testcase == "bdwhere_loopIR") {
         BDWhereBench bench(period, 100 * period, size);
         bench.print_loopIR("bdwhere_loopIR.txt");
+    } else if (testcase == "bdoptsum") {
+        ParallelBDOptSumBench bench(threads, period, size, 10 * period);
+        time = bench.run();
+    } else if (testcase == "bdoptsum_loopIR") {
+        BDOptSumBench bench(period, size, 1000 * period);
+        bench.print_loopIR("bdoptsum_loopIR.txt");
     } else {
         throw runtime_error("Invalid testcase");
     }
