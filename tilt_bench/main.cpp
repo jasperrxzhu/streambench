@@ -83,11 +83,17 @@ int main(int argc, char** argv)
         WhereBench bench(period, size);
         bench.print_llvmIR("where_llvmIR.txt");
     } else if (testcase == "aggregate") {
-        ParallelAggregateBench bench(threads, period, size, 10 * period);
+        ParallelAggregateBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "aggregate_loopIR") {
         AggregateBench bench(period, size, 1000 * period);
         bench.print_loopIR("agg_loopIR.txt");
+    } else if (testcase == "sum64") {
+        ParallelSum64Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "sum8") {
+        ParallelSum8Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
     } else if (testcase == "avg") {
         ParallelAverageBench bench(threads, period, size, 1000 * period);
         time = bench.run();
@@ -206,11 +212,14 @@ int main(int argc, char** argv)
         BDWhereBench bench(period, 100 * period, size);
         bench.print_loopIR("bdwhere_loopIR.txt");
     } else if (testcase == "bdoptsum") {
-        ParallelBDOptSumBench bench(threads, period, size, 10 * period);
+        ParallelBDOptSumBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "bdoptsum_loopIR") {
         BDOptSumBench bench(period, size, 1000 * period);
         bench.print_loopIR("bdoptsum_loopIR.txt");
+    } else if (testcase == "bdoptsum_llvmIR") {
+        BDOptSumBench bench(period, size, 1000 * period);
+        bench.print_llvmIR("bdoptsum_llvmIR.txt");
     } else {
         throw runtime_error("Invalid testcase");
     }

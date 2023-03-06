@@ -28,8 +28,11 @@ private:
         float osize = (float)size / (float)w;
         out_reg = create_reg<int64_t>(ceil(osize));
 
-        SynthData<float> dataset(period, size);
+        SynthAllCmpBDData<int64_t, int8_t> dataset(period, size, 64);
         dataset.fill(&in_reg);
+#ifdef _PRINT_REGION_
+        print_cmp_reg<int64_t, int8_t>(&in_reg, 64, "bdoptsum_in_reg.txt");
+#endif
     }
 
     void execute(intptr_t addr) final

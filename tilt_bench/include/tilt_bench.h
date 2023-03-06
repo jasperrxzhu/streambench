@@ -113,16 +113,23 @@ public:
             auto b_mdata = reg->block_encodings + i;
 
             // populate bases for timestamps and data
+            /*
             auto* base_tl = reg->tl + i;
             base_tl->t = i * period * block_size;
             base_tl->d = period;
+            */
             auto* base_data_ptr = reinterpret_cast<Tbase*>(reg->data + b_mdata->block_start_location);
             *base_data_ptr = static_cast<Tbase>(rand() / static_cast<double>(RAND_MAX / base_range)) + min_base;
 
             for(int j = 0; j < block_size; j++){
+                /*
                 auto* delta_tl = reg->delta_tl + ((i * block_size) + j);
                 delta_tl->t = j * period;
                 delta_tl->d = 0;
+                */
+                auto* tl = reg->tl + ((i * block_size) + j);
+                tl->t = (i * period * block_size) + (j * period);
+                tl->d = period;
                 auto* delta_data_ptr = reinterpret_cast<Tdelta*>(reg->data + b_mdata->block_start_location
                                                                  + sizeof(Tbase) + j * sizeof(Tdelta));
                 *delta_data_ptr = static_cast<Tdelta>(rand() % delta_range);
@@ -136,16 +143,24 @@ public:
             commit_cmp_block(reg, t, len - (num_blocks * block_size), true);
             auto b_mdata = reg->block_encodings + num_blocks;
 
+            /*
             auto* base_tl = reg->tl + num_blocks;
             base_tl->t = num_blocks * period * block_size;
             base_tl->d = period;
+            */
             auto* base_data_ptr = reinterpret_cast<Tbase*>(reg->data + b_mdata->block_start_location);
             *base_data_ptr = static_cast<Tbase>(rand() / static_cast<double>(RAND_MAX / base_range)) + min_base;
 
             for(int j = 0; j < (len - num_blocks * block_size); j++){
+                /*
                 auto* delta_tl = reg->delta_tl + ((num_blocks * block_size) + j);
                 delta_tl->t = j * period;
                 delta_tl->d = 0;
+                */
+
+                auto* tl = reg->tl + ((num_blocks * block_size) + j);
+                tl->t = (num_blocks * period * block_size) + (j * period);
+                tl->d = period;
                 auto* delta_data_ptr = reinterpret_cast<Tdelta*>(reg->data + b_mdata->block_start_location
                                                                  + sizeof(Tbase) + j * sizeof(Tdelta));
                 *delta_data_ptr = static_cast<Tdelta>(rand() % delta_range);
@@ -217,6 +232,7 @@ public:
         cmp_region_t reg;
         auto num_blocks = size / block_size;
 
+        /*
         ival_t* base_tl;
         if((num_blocks * block_size) < size){
             base_tl = new ival_t[num_blocks + 1];
@@ -225,6 +241,8 @@ public:
         }
 
         auto delta_tl = new cmp_ival_t[size];
+        */
+        ival_t* tl = new ival_t[size];
 
         cmp_mdata* block_encodings;
         if((num_blocks * block_size) < size){
@@ -242,7 +260,7 @@ public:
         data_blocks = new char[data_size];
 
         init_cmp_region(&reg, 0,
-                        base_tl, delta_tl,
+                        tl,
                         block_encodings, data_blocks);
         return reg;
     }
@@ -257,7 +275,7 @@ public:
     {
         delete [] reg->tl;
         delete [] reg->data;
-        delete [] reg->delta_tl;
+        // delete [] reg->delta_tl;
         delete [] reg->block_encodings;
     }
 
@@ -295,6 +313,12 @@ public:
 
         auto num_blocks = reg->num_blocks;
 
+        f << "Metadata:" << endl;
+        f << "st: " << reg->st << endl;
+        f << "et: " << reg->et << endl;
+        f << "head: " << reg->head << endl;
+        f << "count: " << reg->count << endl;
+
         for(int i = 0; i < num_blocks; i++){
             f << "Block " << i << ":" << endl;
             f << "Metadata:" << endl;
@@ -304,8 +328,10 @@ public:
             f << "next_block_start_location: " << i_mdata->next_block_start_location << endl;
 
             f << "Bases:" << endl;
+            /*
             f << reg->tl[i].t << endl;
             f << (int) reg->tl[i].d << endl;
+            */
 
             if(i_mdata->cmp) {
                 f << *((Tbase*)(reg->data + i_mdata->block_start_location)) << endl;
@@ -317,8 +343,12 @@ public:
                 loop_end = reg->count - (i * block_size);
             }
             for(int j = 0; j < loop_end; j++){
+                /*
                 f << (int)(reg->delta_tl[(i * block_size) + j].t) << " "
                   << (int)(reg->delta_tl[(i * block_size) + j].d) << " ";
+                */
+                f << (int)(reg->tl[(i * block_size) + j].t) << " "
+                  << (int)(reg->tl[(i * block_size) + j].d) << " ";
                 if(i_mdata->cmp){
                     f << (int)*((Tdelta*)
                          (reg->data + i_mdata->block_start_location+ sizeof(Tbase) + (j * sizeof(Tdelta)))) << endl;
