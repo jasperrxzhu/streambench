@@ -25,6 +25,7 @@
 #include "bd_tilt_where.h"
 
 #include "bdopt_tilt_sum.h"
+#include "bdopt_tilt_select.h"
 
 using namespace std;
 
@@ -220,6 +221,15 @@ int main(int argc, char** argv)
     } else if (testcase == "bdoptsum_llvmIR") {
         BDOptSumBench bench(period, size, 1000 * period);
         bench.print_llvmIR("bdoptsum_llvmIR.txt");
+    } else if (testcase == "bdoptselect") {
+        ParallelBDOptSelectBench bench(threads, period, size);
+        time = bench.run();
+    } else if (testcase == "bdoptselect_loopIR") {
+        BDOptSelectBench bench(period, size);
+        bench.print_loopIR("bdoptselect_loopIR.txt");
+    } else if (testcase == "bdoptselect_llvmIR") {
+        BDOptSelectBench bench(period, size);
+        bench.print_llvmIR("bdoptselect_llvmIR.txt");
     } else {
         throw runtime_error("Invalid testcase");
     }
