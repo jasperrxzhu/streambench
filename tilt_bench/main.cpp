@@ -5,6 +5,7 @@
 #include "tilt_select.h"
 #include "tilt_where.h"
 #include "tilt_aggregate.h"
+#include "tilt_sumwhere.h"
 #include "tilt_average.h"
 #include "tilt_alterdur.h"
 #include "tilt_sliding_sum.h"
@@ -27,6 +28,7 @@
 #include "bdopt_tilt_sum.h"
 #include "bdopt_tilt_select.h"
 #include "bdopt_tilt_where.h"
+#include "bdopt_tilt_sumwhere.h"
 
 using namespace std;
 
@@ -96,6 +98,18 @@ int main(int argc, char** argv)
     } else if (testcase == "sum8") {
         ParallelSum8Bench bench(threads, period, size, 1000 * period);
         time = bench.run();
+    } else if (testcase == "sumwhere64") {
+        ParallelSumWhere64Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "sumwhere64_loopIR") {
+        SumWhere64Bench bench(period, size, 1000 * period);
+        bench.print_loopIR("sumwhere64_loopIR.txt");
+    } else if (testcase == "sumwhere8") {
+        ParallelSumWhere8Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "sumwhere8_loopIR") {
+        SumWhere8Bench bench(period, size, 1000 * period);
+        bench.print_loopIR("sumwhere8_loopIR.txt");
     } else if (testcase == "avg") {
         ParallelAverageBench bench(threads, period, size, 1000 * period);
         time = bench.run();
@@ -240,6 +254,15 @@ int main(int argc, char** argv)
     } else if (testcase == "bdoptwhere_llvmIR") {
         BDOptWhereBench bench(period, size);
         bench.print_llvmIR("bdoptwhere_llvmIR.txt");
+    } else if (testcase == "bdoptsumwhere") {
+        ParallelBDOptSumWhereBench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "bdoptsumwhere_loopIR") {
+        BDOptSumWhereBench bench(period, size, 100 * period);
+        bench.print_loopIR("bdoptsumwhere_loopIR.txt");
+    } else if (testcase == "bdoptsumwhere_llvmIR") {
+        BDOptSumWhereBench bench(period, size, 100 * period);
+        bench.print_llvmIR("bdoptsumwhere_llvmIR.txt");
     }else {
         throw runtime_error("Invalid testcase");
     }

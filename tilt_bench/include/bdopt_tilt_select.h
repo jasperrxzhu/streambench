@@ -56,7 +56,7 @@ private:
 
     void execute(intptr_t addr) final
     {
-        auto query = (region_t* (*)(ts_t, ts_t, region_t*, region_t*)) addr;
+        auto query = (region_t* (*)(ts_t, ts_t, region_t*, cmp_region_t*)) addr;
         query(0, period * size, &out_reg, &in_reg);
     }
 
