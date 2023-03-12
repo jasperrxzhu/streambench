@@ -166,6 +166,60 @@ Op _WindowAvgOnePass(_sym in, int64_t w)
     return wc_op;
 }
 
+Expr _Average64(_sym win, function<Expr(Expr)> selector)
+{
+    auto acc = [selector](Expr s, Expr st, Expr et, Expr d) {
+        auto sum = _get(s, 0);
+        auto count = _get(s, 1);
+        return _new(vector<Expr>{_add(sum, selector(d)), _add(count, _i64(1))});
+    };
+    return _red(win, _new(vector<Expr>{_i64(0), _i64(0)}), acc);
+}
+
+Op _WindowAvgOnePass64(_sym in, int64_t w)
+{
+    auto window = in[_win(-w, 0)];
+    auto window_sym = _sym("win", window);
+    auto avg_state = _Average64(window_sym, [](Expr e) { return e; });
+    auto avg_state_sym = _sym("avg_state", avg_state);
+    auto avg = _div(_get(avg_state_sym, 0), _get(avg_state_sym, 1));
+    auto avg_sym = _sym("avg", avg);
+    auto wc_op = _op(
+        _iter(0, w),
+        Params{ in },
+        SymTable{ {window_sym, window}, {avg_state_sym, avg_state}, {avg_sym, avg} },
+        _true(),
+        avg_sym);
+    return wc_op;
+}
+
+Expr _Average8(_sym win, function<Expr(Expr)> selector)
+{
+    auto acc = [selector](Expr s, Expr st, Expr et, Expr d) {
+        auto sum = _get(s, 0);
+        auto count = _get(s, 1);
+        return _new(vector<Expr>{_add(sum, selector(d)), _add(count, _i8(1))});
+    };
+    return _red(win, _new(vector<Expr>{_i8(0), _i8(0)}), acc);
+}
+
+Op _WindowAvgOnePass8(_sym in, int64_t w)
+{
+    auto window = in[_win(-w, 0)];
+    auto window_sym = _sym("win", window);
+    auto avg_state = _Average8(window_sym, [](Expr e) { return e; });
+    auto avg_state_sym = _sym("avg_state", avg_state);
+    auto avg = _div(_get(avg_state_sym, 0), _get(avg_state_sym, 1));
+    auto avg_sym = _sym("avg", avg);
+    auto wc_op = _op(
+        _iter(0, w),
+        Params{ in },
+        SymTable{ {window_sym, window}, {avg_state_sym, avg_state}, {avg_sym, avg} },
+        _true(),
+        avg_sym);
+    return wc_op;
+}
+
 Op _Join(_sym left, _sym right, function<Expr(_sym, _sym)> op)
 {
     auto e_left = left[_pt(0)];

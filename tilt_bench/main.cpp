@@ -29,6 +29,9 @@
 #include "bdopt_tilt_select.h"
 #include "bdopt_tilt_where.h"
 #include "bdopt_tilt_sumwhere.h"
+#include "bdopt_tilt_avg.h"
+#include "bdopt_tilt_stddev.h"
+
 
 using namespace std;
 
@@ -125,6 +128,12 @@ int main(int argc, char** argv)
     } else if (testcase == "aggregate_llvmIR") {
         AggregateBench bench(period, size, 1000 * period);
         bench.print_llvmIR("agg_llvmIR.txt");
+    } else if (testcase == "avgonepass64") {
+        ParallelAverageOnePass64Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "avgonepass8") {
+        ParallelAverageOnePass8Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
     } else if (testcase == "naivesum") {
         ParallelNaiveSlidingSumBench bench(threads, period, size);
         time = bench.run();
@@ -263,7 +272,25 @@ int main(int argc, char** argv)
     } else if (testcase == "bdoptsumwhere_llvmIR") {
         BDOptSumWhereBench bench(period, size, 100 * period);
         bench.print_llvmIR("bdoptsumwhere_llvmIR.txt");
-    }else {
+    } else if (testcase == "bdoptavg") {
+        ParallelBDOptAvgBench bench(threads, period, size, 100 * period);
+        time = bench.run();
+    } else if (testcase == "bdoptavg_loopIR") {
+        BDOptAvgBench bench(period, size, 1000 * period);
+        bench.print_loopIR("bdoptavg_loopIR.txt");
+    } else if (testcase == "bdoptavg_llvmIR") {
+        BDOptAvgBench bench(period, size, 1000 * period);
+        bench.print_llvmIR("bdoptavg_llvmIR.txt");
+    } else if (testcase == "bdoptstddev") {
+        ParallelBDOptStdDevBench bench(threads, period, size, 100 * period);
+        time = bench.run();
+    } else if (testcase == "bdoptstddev_loopIR") {
+        BDOptStdDevBench bench(period, size, 100 * period);
+        bench.print_loopIR("bdoptstddev_loopIR.txt");
+    } else if (testcase == "bdoptstddev_llvmIR") {
+        BDOptStdDevBench bench(period, size, 100 * period);
+        bench.print_llvmIR("bdoptstddev_llvmIR.txt");
+    } else {
         throw runtime_error("Invalid testcase");
     }
 

@@ -363,6 +363,7 @@ public:
         auto query_op = query();
         auto query_op_sym = _sym("query", query_op);
 
+        cout << "Starting LoopGen" << endl;
         auto loop = LoopGen::Build(query_op_sym, query_op.get());
 
         cout << "Starting printing" << endl;
