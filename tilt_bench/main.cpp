@@ -7,6 +7,7 @@
 #include "tilt_aggregate.h"
 #include "tilt_sumwhere.h"
 #include "tilt_average.h"
+#include "tilt_var.h"
 #include "tilt_alterdur.h"
 #include "tilt_sliding_sum.h"
 #include "tilt_innerjoin.h"
@@ -134,6 +135,15 @@ int main(int argc, char** argv)
     } else if (testcase == "avgonepass8") {
         ParallelAverageOnePass8Bench bench(threads, period, size, 1000 * period);
         time = bench.run();
+    } else if (testcase == "var64") {
+        ParallelVar64Bench bench(threads, period, 1000 * period, size);
+        time = bench.run();
+    } else if (testcase == "var64_loopIR") {
+        Var64Bench bench(period, 1000 * period, size);
+        bench.print_loopIR("var64_loopIR.txt");
+    } else if (testcase == "var64onepass") {
+        ParallelVar64OnePassBench bench(threads, period, 1000 * period, size);
+        time = bench.run();
     } else if (testcase == "naivesum") {
         ParallelNaiveSlidingSumBench bench(threads, period, size);
         time = bench.run();
@@ -167,6 +177,9 @@ int main(int argc, char** argv)
     } else if (testcase == "normalize") {
         ParallelNormBench bench(threads, period, 10000, size);
         time = bench.run();
+    } else if (testcase == "norm_loopIR") {
+        NormBench bench(period, 10000, size);
+        bench.print_loopIR("norm_loopIR.txt");
     } else if (testcase == "fillmean") {
         ParallelImputeBench bench(threads, period, 10000, size);
         time = bench.run();

@@ -98,7 +98,6 @@ Op _WindowBDOptStdDev(_sym in, int64_t w, int64_t p)
     auto stddev_state_sym = _sym("stddev_state", stddev_state);
 
     // stddev = (sum_sq - (sum * sum)/n) / n
-    /*
     auto stddev = _div(
         _sub(
             _get(stddev_state_sym, 0),
@@ -109,8 +108,6 @@ Op _WindowBDOptStdDev(_sym in, int64_t w, int64_t p)
         ),
         _get(stddev_state_sym, 2)
     );
-    */
-    auto stddev = _get(stddev_state_sym, 2);
     auto stddev_sym = _sym("stddev", stddev);
 
     auto wc_op = _op(

@@ -159,8 +159,8 @@ private:
     void release() final
     {
 #ifdef _PRINT_REGION_
-        print_reg<float>(&in_reg, "avgonepass64_in_reg.txt");
-        print_reg<float>(&out_reg, "avgonepass64_out_reg.txt");
+        print_reg<int64_t>(&in_reg, "avgonepass64_in_reg.txt");
+        print_reg<int64_t>(&out_reg, "avgonepass64_out_reg.txt");
 #endif
         release_reg(&in_reg);
         release_reg(&out_reg);
