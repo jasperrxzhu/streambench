@@ -175,11 +175,20 @@ int main(int argc, char** argv)
         OuterJoinBench bench(period, period, size);
         time = bench.run();
     } else if (testcase == "normalize") {
-        ParallelNormBench bench(threads, period, 10000, size);
+        ParallelNormBench bench(threads, period, 1000, size);
         time = bench.run();
     } else if (testcase == "norm_loopIR") {
         NormBench bench(period, 10000, size);
         bench.print_loopIR("norm_loopIR.txt");
+    } else if (testcase == "norm64") {
+        ParallelNorm64Bench bench(threads, period, 1000, size);
+        time = bench.run();
+    } else if (testcase == "norm64onepass") {
+        ParallelNorm64OnePassBench bench(threads, period, 1000, size);
+        time = bench.run();
+    } else if (testcase == "norm64onepass_loopIR") {
+        Norm64OnePassBench bench(period, 1000, size);
+        bench.print_loopIR("norm64onepass_loopIR.txt");
     } else if (testcase == "fillmean") {
         ParallelImputeBench bench(threads, period, 10000, size);
         time = bench.run();

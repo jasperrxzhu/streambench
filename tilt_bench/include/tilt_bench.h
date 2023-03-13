@@ -294,7 +294,7 @@ public:
         for (int i = 0; i <= end; i++) {
             auto* ptr = data + i;
             if(ptr) {
-                f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << (int)*ptr << endl;
+                f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << *ptr << endl;
             }
         }
 

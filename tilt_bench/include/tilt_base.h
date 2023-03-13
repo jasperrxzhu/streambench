@@ -6,6 +6,8 @@
 using namespace tilt;
 using namespace tilt::tilder;
 
+/*** Simple operators ***/
+
 Op _Select(_sym in, _sym val, function<Expr(_sym, _sym)> selector)
 {
     auto e = in[_pt(0)];
@@ -15,6 +17,21 @@ Op _Select(_sym in, _sym val, function<Expr(_sym, _sym)> selector)
     auto sel_op = _op(
         _iter(0, 1),
         Params{in, val},
+        SymTable{{e_sym, e}, {res_sym, res}},
+        _exists(e_sym),
+        res_sym);
+    return sel_op;
+}
+
+Op _Select(_sym in, _sym val0, _sym val1, function<Expr(_sym, _sym, _sym)> selector)
+{
+    auto e = in[_pt(0)];
+    auto e_sym = _sym("e", e);
+    auto res = selector(e_sym, val0, val1);
+    auto res_sym = _sym("res", res);
+    auto sel_op = _op(
+        _iter(0, 1),
+        Params{in, val0, val1},
         SymTable{{e_sym, e}, {res_sym, res}},
         _exists(e_sym),
         res_sym);
@@ -35,6 +52,8 @@ Op _Where(_sym in, function<Expr(_sym)> filter)
         e_sym);
     return where_op;
 }
+
+/*** Simple Reductions ***/
 
 Expr _Count(_sym win)
 {
@@ -119,6 +138,8 @@ Op _WindowSum8(_sym in, int64_t w)
 {
     return _WindowSum8(in, w, w);
 }
+
+/*** Average ***/
 
 Op _WindowAvg(_sym in, int64_t w)
 {
@@ -219,6 +240,57 @@ Op _WindowAvgOnePass8(_sym in, int64_t w)
         avg_sym);
     return wc_op;
 }
+
+/*** Variance / StdDev ***/
+
+Expr _Var64OnePass(_sym win)
+{
+    auto acc = [](Expr s, Expr st, Expr et, Expr d) {
+        auto sum_sq = _get(s, 0);
+        auto sum = _get(s, 1);
+        auto count = _get(s, 2);
+        return _new(vector<Expr>{_add(sum_sq, _mul(d, d)),
+                                 _add(sum, d),
+                                 _add(count, _i64(1))});
+    };
+
+    return _red(win, _new(vector<Expr>{_i64(0), _i64(0), _i64(0)}), acc);
+}
+
+Op _WindowVar64OnePass(_sym in, int64_t window)
+{
+    auto win = in[_win(-window, 0)];
+    auto win_sym = _sym("win", win);
+
+    auto var_state = _Var64OnePass(win_sym);
+    auto var_state_sym = _sym("var_state", var_state);
+
+    auto var = _div(
+        _sub(
+            _get(var_state_sym, 0),
+            _div(
+                _mul(_get(var_state_sym, 1), _get(var_state_sym, 1)),
+                _get(var_state_sym, 2)
+            )
+        ),
+        _get(var_state_sym, 2)
+    );
+    auto var_sym = _sym("var", var);
+
+    auto wc_op = _op(
+        _iter(0, window),
+        Params{ in },
+        SymTable{
+            {win_sym, win},
+            {var_state_sym, var_state},
+            {var_sym, var}
+        },
+        _true(),
+        var_sym);
+    return wc_op;
+}
+
+/*** Joins ***/
 
 Op _Join(_sym left, _sym right, function<Expr(_sym, _sym)> op)
 {

@@ -111,53 +111,6 @@ public:
 
 // INT64 OnePass Benchmark
 
-Expr _Var64OnePass(_sym win)
-{
-    auto acc = [](Expr s, Expr st, Expr et, Expr d) {
-        auto sum_sq = _get(s, 0);
-        auto sum = _get(s, 1);
-        auto count = _get(s, 2);
-        return _new(vector<Expr>{_add(sum_sq, _mul(d, d)),
-                                 _add(sum, d),
-                                 _add(count, _i64(1))});
-    };
-
-    return _red(win, _new(vector<Expr>{_i64(0), _i64(0), _i64(0)}), acc);
-}
-
-Op _WindowVar64OnePass(_sym in, int64_t window)
-{
-    auto win = in[_win(-window, 0)];
-    auto win_sym = _sym("win", win);
-
-    auto var_state = _Var64OnePass(win_sym);
-    auto var_state_sym = _sym("var_state", var_state);
-
-    auto var = _div(
-        _sub(
-            _get(var_state_sym, 0),
-            _div(
-                _mul(_get(var_state_sym, 1), _get(var_state_sym, 1)),
-                _get(var_state_sym, 2)
-            )
-        ),
-        _get(var_state_sym, 2)
-    );
-    auto var_sym = _sym("var", var);
-
-    auto wc_op = _op(
-        _iter(0, window),
-        Params{ in },
-        SymTable{
-            {win_sym, win},
-            {var_state_sym, var_state},
-            {var_sym, var}
-        },
-        _true(),
-        var_sym);
-    return wc_op;
-}
-
 class Var64OnePassBench : public Benchmark {
 public:
     Var64OnePassBench(dur_t period, int64_t window, int64_t size) :
