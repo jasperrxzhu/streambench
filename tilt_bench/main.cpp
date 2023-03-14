@@ -32,7 +32,7 @@
 #include "bdopt_tilt_sumwhere.h"
 #include "bdopt_tilt_avg.h"
 #include "bdopt_tilt_stddev.h"
-
+#include "bdopt_tilt_norm.h"
 
 using namespace std;
 
@@ -180,11 +180,14 @@ int main(int argc, char** argv)
     } else if (testcase == "norm_loopIR") {
         NormBench bench(period, 10000, size);
         bench.print_loopIR("norm_loopIR.txt");
+    } else if (testcase == "norm_llvmIR") {
+        NormBench bench(period, 10000, size);
+        bench.print_llvmIR("norm_llvmIR.txt");
     } else if (testcase == "norm64") {
         ParallelNorm64Bench bench(threads, period, 1000, size);
         time = bench.run();
     } else if (testcase == "norm64onepass") {
-        ParallelNorm64OnePassBench bench(threads, period, 1000, size);
+        ParallelNorm64OnePassBench bench(threads, period, 1000 * period, size);
         time = bench.run();
     } else if (testcase == "norm64onepass_loopIR") {
         Norm64OnePassBench bench(period, 1000, size);
@@ -295,7 +298,7 @@ int main(int argc, char** argv)
         BDOptSumWhereBench bench(period, size, 100 * period);
         bench.print_llvmIR("bdoptsumwhere_llvmIR.txt");
     } else if (testcase == "bdoptavg") {
-        ParallelBDOptAvgBench bench(threads, period, size, 100 * period);
+        ParallelBDOptAvgBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "bdoptavg_loopIR") {
         BDOptAvgBench bench(period, size, 1000 * period);
@@ -304,7 +307,7 @@ int main(int argc, char** argv)
         BDOptAvgBench bench(period, size, 1000 * period);
         bench.print_llvmIR("bdoptavg_llvmIR.txt");
     } else if (testcase == "bdoptstddev") {
-        ParallelBDOptStdDevBench bench(threads, period, size, 100 * period);
+        ParallelBDOptStdDevBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "bdoptstddev_loopIR") {
         BDOptStdDevBench bench(period, size, 100 * period);
@@ -312,6 +315,15 @@ int main(int argc, char** argv)
     } else if (testcase == "bdoptstddev_llvmIR") {
         BDOptStdDevBench bench(period, size, 100 * period);
         bench.print_llvmIR("bdoptstddev_llvmIR.txt");
+    } else if (testcase == "bdoptnorm") {
+        ParallelBDOptNormBench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "bdoptnorm_loopIR") {
+        BDOptNormBench bench(period, size, 100 * period);
+        bench.print_loopIR("bdoptnorm_loopIR.txt");
+    } else if (testcase == "bdoptnorm_llvmIR") {
+        BDOptNormBench bench(period, size, 100 * period);
+        bench.print_llvmIR("bdoptnorm_llvmIR.txt");
     } else {
         throw runtime_error("Invalid testcase");
     }
