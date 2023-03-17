@@ -23,6 +23,9 @@
 #include "bd_tilt_select.h"
 #include "bd_tilt_where.h"
 
+#include "bdloop_tilt_select.h"
+
+
 using namespace std;
 
 int main(int argc, char** argv)
@@ -202,6 +205,12 @@ int main(int argc, char** argv)
     } else if (testcase == "bdwhere_loopIR") {
         BDWhereBench bench(period, 100 * period, size);
         bench.print_loopIR("bdwhere_loopIR.txt");
+    } else if (testcase == "bdloopselect") {
+        ParallelBDLoopSelectBench bench(threads, period, size);
+        time = bench.run();
+    } else if (testcase == "bdloopselect_loopIR") {
+        BDLoopSelectBench bench(period, size);
+        bench.print_loopIR("bdloopselect_loopIR.txt");
     } else {
         throw runtime_error("Invalid testcase");
     }

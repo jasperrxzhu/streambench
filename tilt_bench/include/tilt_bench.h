@@ -80,6 +80,44 @@ private:
     int64_t len;
 };
 
+template<typename Tbase, typename Tdelta>
+class BDDataset {
+public:
+    virtual void fill(cmp_region_t*) = 0;
+};
+
+template<typename Tbase, typename Tdelta>
+class SynthAllCmpBDData : public BDDataset<Tbase, Tdelta>{
+public:
+    SynthAllCmpBDData(int64_t len, int64_t block_size) : 
+        len(len), block_size(block_size)
+    {}
+
+    void fill(cmp_region_t* reg) final
+    {
+        double base_range = 100;
+        double min_base = -100;
+        int delta_range = 100;
+        auto num_blocks = len / block_size;
+
+        for(int i = 0; i < len; i++) {
+            if(i % block_size == 0){
+                auto b = i / block_size;
+                auto* base_data_ptr = reinterpret_cast<Tbase*>(reg->data + (b * sizeof(Tbase)));
+                *base_data_ptr = static_cast<Tbase>(rand() / static_cast<double>(RAND_MAX / base_range)) + min_base;
+            }
+            auto* delta_data_ptr = reinterpret_cast<Tdelta*>(reg->delta_data + (i * sizeof(Tdelta)));
+            *delta_data_ptr = static_cast<Tdelta>(rand() % delta_range);
+        }
+
+        reg->head += len;
+        reg->count += len;
+    }
+
+private:
+    int64_t len;
+    int64_t block_size;
+};
 
 class Benchmark {
 public:
@@ -127,10 +165,37 @@ public:
         return reg;
     }
 
+    template<typename Tbase, typename Tdelta>
+    static cmp_region_t create_cmp_reg(int64_t size, uint32_t block_size)
+    {
+        cmp_region_t reg;
+        auto num_blocks = size / block_size;
+
+        char* base_data;
+        if((num_blocks * block_size) < size){
+            base_data = new char[sizeof(Tbase) * (num_blocks + 1)];
+        } else {
+            base_data = new char[sizeof(Tbase) * num_blocks];
+        }
+
+        char* delta_data = new char[sizeof(Tdelta) * size];
+
+        init_cmp_region(&reg, 0, get_buf_size(sizeof(Tdelta) * size),
+                        base_data, delta_data);
+        return reg;
+    }
+
     static void release_reg(region_t* reg)
     {
         // delete [] reg->tl;
         delete [] reg->data;
+    }
+
+    static void release_cmp_reg(cmp_region_t* reg)
+    {
+        // delete [] reg->tl;
+        delete [] reg->data;
+        delete [] reg->delta_data;
     }
 
 #ifdef _PRINT_REGION_
@@ -152,6 +217,33 @@ public:
 
         f.close();
     }
+
+    template<typename Tbase, typename Tdelta>
+    void print_cmp_reg(cmp_region_t* reg, int block_size, string fname)
+    {
+        ofstream f;
+        f.open(fname);
+
+        f << "Metadata:" << endl;
+        f << "st: " << reg->st << endl;
+        f << "et: " << reg->et << endl;
+        f << "head: " << reg->head << endl;
+        f << "count: " << reg->count << endl;
+
+        for(int i = 0; i < reg->count; i++){
+            if(i % block_size == 0){
+                auto b = i / block_size;
+                f << "Block " << b << ":" << endl;
+                f << "Bases:" << endl;
+                f << *reinterpret_cast<Tbase*>(reg->data + (b * sizeof(Tbase))) << endl;
+                f << "Deltas:" << endl;
+            }
+            f << (int)(*reinterpret_cast<Tdelta*>(reg->delta_data + (i * sizeof(Tdelta)))) << endl;
+        }
+
+        f.close();
+    }
+
 #endif // _PRINT_REGION_
 
     void print_loopIR( string fname )
