@@ -56,7 +56,7 @@ private:
     {
         auto in_sym = _sym("in",
                            tilt::Type(types::BASEDELTA<int64_t, uint8_t, 64>(), _iter(0, -1)));
-        return _BDOptWherev02(in_sym, period * size,
+        return _BDOptWherev01(in_sym, period * size,
                               [](_sym in) { return _gt(in, _i64(0)); });
     }
 

@@ -115,14 +115,14 @@ public:
             // populate bases for timestamps and data
             auto* base_tl = reg->tl + i;
             base_tl->t = i * period * block_size;
-            base_tl->d = period;
+            base_tl->d = 0;
             auto* base_data_ptr = reinterpret_cast<Tbase*>(reg->data + b_mdata->block_start_location);
             *base_data_ptr = static_cast<Tbase>(rand() / static_cast<double>(RAND_MAX / base_range)) + min_base;
 
             for(int j = 0; j < block_size; j++){
                 auto* delta_tl = reg->delta_tl + ((i * block_size) + j);
                 delta_tl->t = j * period;
-                delta_tl->d = 0;
+                delta_tl->d = period;
 
                 /*
                 auto* tl = reg->tl + ((i * block_size) + j);
@@ -145,14 +145,14 @@ public:
 
             auto* base_tl = reg->tl + num_blocks;
             base_tl->t = num_blocks * period * block_size;
-            base_tl->d = period;
+            base_tl->d = 0;
             auto* base_data_ptr = reinterpret_cast<Tbase*>(reg->data + b_mdata->block_start_location);
             *base_data_ptr = static_cast<Tbase>(rand() / static_cast<double>(RAND_MAX / base_range)) + min_base;
 
             for(int j = 0; j < (len - num_blocks * block_size); j++){
                 auto* delta_tl = reg->delta_tl + ((num_blocks * block_size) + j);
                 delta_tl->t = j * period;
-                delta_tl->d = 0;
+                delta_tl->d = period;
 
                 /*
                 auto* tl = reg->tl + ((num_blocks * block_size) + j);
@@ -294,7 +294,7 @@ public:
         for (int i = 0; i <= end; i++) {
             auto* ptr = data + i;
             if(ptr) {
-                f << reg->tl[i].t << ' ' << reg->tl[i].d << ' ' << *ptr << endl;
+                f << reg->tl[i].t << ' ' << (int)reg->tl[i].d << ' ' << *ptr << endl;
             }
         }
 
