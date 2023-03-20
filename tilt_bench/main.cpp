@@ -85,6 +85,12 @@ int main(int argc, char** argv)
     } else if (testcase == "aggregate_loopIR") {
         AggregateBench bench(period, size, 1000 * period);
         bench.print_loopIR("agg_loopIR.txt");
+    } else if (testcase == "sum64") {
+        ParallelSum64Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "sum8") {
+        ParallelSum8Bench bench(threads, period, size, 1000 * period);
+        time = bench.run();
     } else if (testcase == "avg") {
         ParallelAverageBench bench(threads, period, size, 1000 * period);
         time = bench.run();

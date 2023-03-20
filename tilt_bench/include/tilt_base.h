@@ -68,6 +68,58 @@ Op _WindowSum(_sym in, int64_t w)
     return _WindowSum(in, w, w);
 }
 
+Expr _Sum64(_sym win)
+{
+    auto acc = [](Expr s, Expr st, Expr et, Expr d) { return _add(s, d); };
+    return _red(win, _i64(0), acc);
+}
+
+Op _WindowSum64(_sym in, int64_t w, int64_t p)
+{
+    auto window = in[_win(-w, 0)];
+    auto window_sym = _sym("win", window);
+    auto sum = _Sum64(window_sym);
+    auto sum_sym = _sym("sum", sum);
+    auto wc_op = _op(
+        _iter(0, p),
+        Params{ in },
+        SymTable{ {window_sym, window}, {sum_sym, sum} },
+        _true(),
+        sum_sym);
+    return wc_op;
+}
+
+Op _WindowSum64(_sym in, int64_t w)
+{
+    return _WindowSum64(in, w, w);
+}
+
+Expr _Sum8(_sym win)
+{
+    auto acc = [](Expr s, Expr st, Expr et, Expr d) { return _add(s, d); };
+    return _red(win, _i8(0), acc);
+}
+
+Op _WindowSum8(_sym in, int64_t w, int64_t p)
+{
+    auto window = in[_win(-w, 0)];
+    auto window_sym = _sym("win", window);
+    auto sum = _Sum8(window_sym);
+    auto sum_sym = _sym("sum", sum);
+    auto wc_op = _op(
+        _iter(0, p),
+        Params{ in },
+        SymTable{ {window_sym, window}, {sum_sym, sum} },
+        _true(),
+        sum_sym);
+    return wc_op;
+}
+
+Op _WindowSum8(_sym in, int64_t w)
+{
+    return _WindowSum8(in, w, w);
+}
+
 Op _WindowAvg(_sym in, int64_t w)
 {
     auto window = in[_win(-w, 0)];
