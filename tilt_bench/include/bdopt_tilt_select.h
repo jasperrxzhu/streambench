@@ -27,24 +27,6 @@ Op _BDOptSelectv01(_sym in, int64_t w, function<Expr(_sym)> selector)
     return sel_op;
 }
 
-Op _BDOptSelectv02(_sym in, int64_t w, function<Expr(_sym)> selector)
-{
-    auto window = in[_win(-w, 0)];
-    auto window_sym = _sym("win", window);
-    auto basic_select = _Select(window_sym, selector);
-    auto block_select = _block_op(basic_select);
-    auto block_select_sym = _sym("select", block_select);
-    auto sel_op = _op(
-        _iter(0, w),
-        Params{ in },
-        SymTable{ {window_sym, window},
-                  {block_select_sym, block_select} },
-        _true(),
-        block_select_sym
-    );
-    return sel_op;
-}
-
 class BDOptSelectBench : public Benchmark {
 public:
     BDOptSelectBench(dur_t period, int64_t size) :

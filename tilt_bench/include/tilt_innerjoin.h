@@ -19,22 +19,22 @@ public:
 private:
     Op query() final
     {
-        auto left_sym = _sym("left", tilt::Type(types::FLOAT32, _iter(0, -1)));
-        auto right_sym = _sym("right", tilt::Type(types::FLOAT32, _iter(0, -1)));
+        auto left_sym = _sym("left", tilt::Type(types::BASEDELTA<int64_t, uint8_t, 64>(), _iter(0, -1)));
+        auto right_sym = _sym("right", tilt::Type(types::BASEDELTA<int64_t, uint8_t, 64>(), _iter(0, -1)));
         return _Join(left_sym, right_sym, [](_sym left, _sym right) { return left + right; });
     }
 
     void init() final
     {
-        left_reg = create_reg<float>(size);
-        right_reg = create_reg<float>(size);
+        left_reg = create_cmp_reg<int64_t, int8_t>(size, 64);
+        right_reg = create_cmp_reg<int64_t, int8_t>(size, 64);
         float ratio = (float) max(lperiod, rperiod) / (float) min(lperiod, rperiod);
         int osize = size * ceil(ratio);
-        out_reg = create_reg<float>(osize);
+        out_reg = create_reg<int64_t>(osize);
 
-        SynthData<float> dataset_left(lperiod, size);
+        SynthAllCmpBDData<int64_t, int8_t> dataset_left(lperiod, size, 64);
         dataset_left.fill(&left_reg);
-        SynthData<float> dataset_right(rperiod, size);
+        SynthAllCmpBDData<int64_t, int8_t> dataset_right(rperiod, size, 64);
         dataset_right.fill(&right_reg);
     }
 
@@ -46,13 +46,18 @@ private:
 
     void release() final
     {
-        release_reg(&left_reg);
-        release_reg(&right_reg);
+#ifdef _PRINT_REGION_
+        print_cmp_reg<int64_t, int8_t>(&left_reg, 64, "bdjoin_left_reg.txt");
+        print_cmp_reg<int64_t, int8_t>(&right_reg, 64, "bdjoin_right_reg.txt");
+        print_reg<int64_t>(&out_reg, "bdjoin_out_reg.txt");
+#endif
+        release_cmp_reg(&left_reg);
+        release_cmp_reg(&right_reg);
         release_reg(&out_reg);
     }
 
-    region_t left_reg;
-    region_t right_reg;
+    cmp_region_t left_reg;
+    cmp_region_t right_reg;
     region_t out_reg;
 
     int64_t size;

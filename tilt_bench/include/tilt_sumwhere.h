@@ -45,17 +45,17 @@ public:
 private:
     Op query() final
     {
-        auto in_sym = _sym("in", tilt::Type(types::INT64, _iter(0, -1)));
+        auto in_sym = _sym("in", tilt::Type(types::BASEDELTA<int64_t, uint8_t, 64>(), _iter(0, -1)));
         return _WindowSumWhere64(in_sym, w, [](Expr e) { return _gt(e, _i64(0)); });
     }
 
     void init() final
     {
-        in_reg = create_reg<int64_t>(size);
+        in_reg = create_cmp_reg<int64_t, int8_t>(size, 64);
         float osize = (float)size / (float)w;
         out_reg = create_reg<int64_t>(ceil(osize));
 
-        SynthData<int64_t> dataset(period, size);
+        SynthAllCmpBDData<int64_t, int8_t> dataset(period, size, 64);
         dataset.fill(&in_reg);
     }
 
@@ -68,14 +68,14 @@ private:
     void release() final
     {
 #ifdef _PRINT_REGION_
-        print_reg<int64_t>(&in_reg, "sumwhere64_in_reg.txt");
+        print_cmp_reg<int64_t, int8_t>(&in_reg, 64, "sumwhere64_in_reg.txt");
         print_reg<int64_t>(&out_reg, "sumwhere64_out_reg.txt");
 #endif
-        release_reg(&in_reg);
+        release_cmp_reg(&in_reg);
         release_reg(&out_reg);
     }
 
-    region_t in_reg;
+    cmp_region_t in_reg;
     region_t out_reg;
 
     int64_t size;

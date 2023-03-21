@@ -98,17 +98,24 @@ Op _WindowBDOptStdDev(_sym in, int64_t w, int64_t p)
     auto stddev_state_sym = _sym("stddev_state", stddev_state);
 
     // stddev = (sum_sq - (sum * sum)/n) / n
-    auto stddev = _div(
+    auto sum_sq = _cast(types::FLOAT32, _get(stddev_state_sym, 0));
+    auto sum_sq_sym = _sym("sum_sq", sum_sq);
+    auto sum = _cast(types::FLOAT32, _get(stddev_state_sym, 1));
+    auto sum_sym = _sym("sum", sum);
+    auto count = _cast(types::FLOAT32, _get(stddev_state_sym, 2));
+    auto count_sym = _sym("count", count);
+
+    auto var = _div(
         _sub(
-            _get(stddev_state_sym, 0),
+            sum_sq_sym,
             _div(
-                _mul(_get(stddev_state_sym, 1), _get(stddev_state_sym, 1)),
-                _get(stddev_state_sym, 2)
+                _mul(sum_sym, sum_sym),
+                count_sym
             )
         ),
-        _get(stddev_state_sym, 2)
+        count_sym
     );
-    auto stddev_sym = _sym("stddev", stddev);
+    auto var_sym = _sym("var", var);
 
     auto wc_op = _op(
         _iter(0, p),
@@ -116,10 +123,13 @@ Op _WindowBDOptStdDev(_sym in, int64_t w, int64_t p)
         SymTable{
             {window_sym, window},
             {stddev_state_sym, stddev_state},
-            {stddev_sym, stddev}
+            {sum_sq_sym, sum_sq},
+            {sum_sym, sum},
+            {count_sym, count},
+            {var_sym, var}
         },
         _true(),
-        stddev_sym);
+        var_sym);
     return wc_op;
 }
 

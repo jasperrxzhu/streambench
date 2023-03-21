@@ -82,6 +82,7 @@ private:
         print_reg<int64_t>(&out_reg, "bdoptsumwhere_out_reg.txt");
 #endif
         release_cmp_reg(&in_reg);
+        release_reg(&state_reg);
         release_reg(&out_reg);
     }
 

@@ -27,24 +27,6 @@ Op _BDOptWherev01(_sym in, int64_t w, function<Expr(_sym)> filter)
     return where_op;
 }
 
-Op _BDOptWherev02(_sym in, int64_t w, function<Expr(_sym)> filter)
-{
-    auto window = in[_win(-w, 0)];
-    auto window_sym = _sym("win", window);
-    auto basic_where = _Where(window_sym, filter);
-    auto block_where = _block_op(basic_where);
-    auto block_where_sym = _sym("where", block_where);
-    auto where_op = _op(
-        _iter(0, w),
-        Params{ in },
-        SymTable{ {window_sym, window},
-                  {block_where_sym, block_where} },
-        _true(),
-        block_where_sym
-    );
-    return where_op;
-}
-
 class BDOptWhereBench : public Benchmark {
 public:
     BDOptWhereBench(dur_t period, int64_t size) :

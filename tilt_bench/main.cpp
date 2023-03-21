@@ -25,6 +25,7 @@
 
 #include "bd_tilt_select.h"
 #include "bd_tilt_where.h"
+#include "bd_tilt_sum.h"
 
 #include "bdopt_tilt_sum.h"
 #include "bdopt_tilt_select.h"
@@ -144,6 +145,12 @@ int main(int argc, char** argv)
     } else if (testcase == "var64onepass") {
         ParallelVar64OnePassBench bench(threads, period, 1000 * period, size);
         time = bench.run();
+    } else if (testcase == "var64onepass_loopIR") {
+        Var64OnePassBench bench(period, 1000 * period, size);
+        bench.print_loopIR("var64_loopIR.txt");
+    } else if (testcase == "var64onepass_llvmIR") {
+        Var64OnePassBench bench(period, 1000 * period, size);
+        bench.print_llvmIR("var64_llvmIR.txt");
     } else if (testcase == "naivesum") {
         ParallelNaiveSlidingSumBench bench(threads, period, size);
         time = bench.run();
@@ -267,6 +274,12 @@ int main(int argc, char** argv)
     } else if (testcase == "bdwhere_llvmIR") {
         BDWhereBench bench(period, size);
         bench.print_llvmIR("bdwhere_llvmIR.txt");
+    } else if (testcase == "bdsum") {
+        ParallelBDSumBench bench(threads, period, size, 1000 * period);
+        time = bench.run();
+    } else if (testcase == "bdsum_loopIR") {
+        BDSumBench bench(period, size, 1000 * period);
+        bench.print_loopIR("bdsum_loopIR.txt");
     } else if (testcase == "bdoptsum") {
         ParallelBDOptSumBench bench(threads, period, size, 1000 * period);
         time = bench.run();
@@ -298,7 +311,7 @@ int main(int argc, char** argv)
         ParallelBDOptSumWhereBench bench(threads, period, size, 1000 * period);
         time = bench.run();
     } else if (testcase == "bdoptsumwhere_loopIR") {
-        BDOptSumWhereBench bench(period, size, 100 * period);
+        BDOptSumWhereBench bench(period, size, 1000 * period);
         bench.print_loopIR("bdoptsumwhere_loopIR.txt");
     } else if (testcase == "bdoptsumwhere_llvmIR") {
         BDOptSumWhereBench bench(period, size, 100 * period);

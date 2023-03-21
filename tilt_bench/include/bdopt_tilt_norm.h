@@ -47,8 +47,7 @@ Op _WindowBDOptNormV01(_sym in, int64_t w)
                               [](_sym e, _sym avg, _sym sd){
                                     return _div(_sub(_cast(types::FLOAT32, e), avg), sd);
                               });
-    auto block_norm = _block_op(basic_norm);
-    auto block_norm_sym = _sym("block_norm", block_norm);
+    auto basic_norm_sym = _sym("basic_norm", basic_norm);
 
     auto query_op = _op(
         _iter(0, w),
@@ -61,10 +60,10 @@ Op _WindowBDOptNormV01(_sym in, int64_t w)
             {count_sym, count},
             {avg_sym, avg},
             {sd_sym, sd},
-            {block_norm_sym, block_norm}
+            {basic_norm_sym, basic_norm}
         },
         _true(),
-        block_norm_sym
+        basic_norm_sym
     );
     return query_op;
 }

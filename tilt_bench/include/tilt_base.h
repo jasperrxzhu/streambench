@@ -265,15 +265,22 @@ Op _WindowVar64OnePass(_sym in, int64_t window)
     auto var_state = _Var64OnePass(win_sym);
     auto var_state_sym = _sym("var_state", var_state);
 
+    auto sum_sq = _cast(types::FLOAT32, _get(var_state_sym, 0));
+    auto sum_sq_sym = _sym("sum_sq", sum_sq);
+    auto sum = _cast(types::FLOAT32, _get(var_state_sym, 1));
+    auto sum_sym = _sym("sum", sum);
+    auto count = _cast(types::FLOAT32, _get(var_state_sym, 2));
+    auto count_sym = _sym("count", count);
+
     auto var = _div(
         _sub(
-            _get(var_state_sym, 0),
+            sum_sq_sym,
             _div(
-                _mul(_get(var_state_sym, 1), _get(var_state_sym, 1)),
-                _get(var_state_sym, 2)
+                _mul(sum_sym, sum_sym),
+                count_sym
             )
         ),
-        _get(var_state_sym, 2)
+        count_sym
     );
     auto var_sym = _sym("var", var);
 
@@ -283,6 +290,9 @@ Op _WindowVar64OnePass(_sym in, int64_t window)
         SymTable{
             {win_sym, win},
             {var_state_sym, var_state},
+            {sum_sq_sym, sum_sq},
+            {sum_sym, sum},
+            {count_sym, count},
             {var_sym, var}
         },
         _true(),
