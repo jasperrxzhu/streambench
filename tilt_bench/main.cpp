@@ -250,17 +250,23 @@ int main(int argc, char** argv)
         ParallelYahooBench bench(threads, period, 100 * period, size);
         time = bench.run();
     } else if (testcase == "bdselect") {
-        ParallelBDSelectBench bench(threads, period, 100 * period, size);
+        ParallelBDSelectBench bench(threads, period, size);
         time = bench.run();
     } else if (testcase == "bdselect_loopIR") {
-        BDSelectBench bench(period, 100 * period, size);
+        BDSelectBench bench(period, size);
         bench.print_loopIR("bdselect_loopIR.txt");
+    } else if (testcase == "bdselect_llvmIR") {
+        BDSelectBench bench(period, size);
+        bench.print_llvmIR("bdselect_llvmIR.txt");
     } else if (testcase == "bdwhere") {
-        ParallelBDWhereBench bench(threads, period, 100 * period, size);
+        ParallelBDWhereBench bench(threads, period, size);
         time = bench.run();
     } else if (testcase == "bdwhere_loopIR") {
-        BDWhereBench bench(period, 100 * period, size);
+        BDWhereBench bench(period, size);
         bench.print_loopIR("bdwhere_loopIR.txt");
+    } else if (testcase == "bdwhere_llvmIR") {
+        BDWhereBench bench(period, size);
+        bench.print_llvmIR("bdwhere_llvmIR.txt");
     } else if (testcase == "bdoptsum") {
         ParallelBDOptSumBench bench(threads, period, size, 1000 * period);
         time = bench.run();
