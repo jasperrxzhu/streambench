@@ -21,6 +21,21 @@ Op _Select(_sym in, _sym val, function<Expr(_sym, _sym)> selector)
     return sel_op;
 }
 
+Op _Select(_sym in, _sym val0, _sym val1, function<Expr(_sym, _sym, _sym)> selector)
+{
+    auto e = in[_pt(0)];
+    auto e_sym = _sym("e", e);
+    auto res = selector(e_sym, val0, val1);
+    auto res_sym = _sym("res", res);
+    auto sel_op = _op(
+        _iter(0, 1),
+        Params{in, val0, val1},
+        SymTable{{e_sym, e}, {res_sym, res}},
+        _exists(e_sym),
+        res_sym);
+    return sel_op;
+}
+
 Op _Where(_sym in, function<Expr(_sym)> filter)
 {
     auto e = in[_pt(0)];
@@ -163,6 +178,63 @@ Op _WindowAvgOnePass(_sym in, int64_t w)
         SymTable{ {window_sym, window}, {avg_state_sym, avg_state}, {avg_sym, avg} },
         _true(),
         avg_sym);
+    return wc_op;
+}
+
+Expr _Var64OnePass(_sym win)
+{
+    auto acc = [](Expr s, Expr st, Expr et, Expr d) {
+        auto sum_sq = _get(s, 0);
+        auto sum = _get(s, 1);
+        auto count = _get(s, 2);
+        return _new(vector<Expr>{_add(sum_sq, _mul(d, d)),
+                                 _add(sum, d),
+                                 _add(count, _i64(1))});
+    };
+
+    return _red(win, _new(vector<Expr>{_i64(0), _i64(0), _i64(0)}), acc);
+}
+
+Op _WindowVar64OnePass(_sym in, int64_t window)
+{
+    auto win = in[_win(-window, 0)];
+    auto win_sym = _sym("win", win);
+
+    auto var_state = _Var64OnePass(win_sym);
+    auto var_state_sym = _sym("var_state", var_state);
+
+    auto sum_sq = _cast(types::FLOAT32, _get(var_state_sym, 0));
+    auto sum_sq_sym = _sym("sum_sq", sum_sq);
+    auto sum = _cast(types::FLOAT32, _get(var_state_sym, 1));
+    auto sum_sym = _sym("sum", sum);
+    auto count = _cast(types::FLOAT32, _get(var_state_sym, 2));
+    auto count_sym = _sym("count", count);
+
+    auto var = _div(
+        _sub(
+            sum_sq_sym,
+            _div(
+                _mul(sum_sym, sum_sym),
+                count_sym
+            )
+        ),
+        count_sym
+    );
+    auto var_sym = _sym("var", var);
+
+    auto wc_op = _op(
+        _iter(0, window),
+        Params{ in },
+        SymTable{
+            {win_sym, win},
+            {var_state_sym, var_state},
+            {sum_sq_sym, sum_sq},
+            {sum_sym, sum},
+            {count_sym, count},
+            {var_sym, var}
+        },
+        _true(),
+        var_sym);
     return wc_op;
 }
 

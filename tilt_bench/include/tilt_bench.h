@@ -31,14 +31,21 @@ public:
 
     void fill(region_t* reg) final
     {
-        double range = 100;
+        double base_range = 100;
+        double min_base = -200;
+        int delta_range = 100;
+        T base;
 
         auto data = reinterpret_cast<T*>(reg->data);
         for (int i = 0; i < len; i++) {
+            if(i % 64 == 0){
+                base = static_cast<T>(rand() / static_cast<double>(RAND_MAX / base_range)) + min_base;
+            }
             auto t = period * (i + 1);
             commit_data(reg, t);
+            auto delta = static_cast<T>(rand() % delta_range);
             auto* ptr = reinterpret_cast<T*>(fetch(reg, t, get_end_idx(reg), sizeof(T)));
-            *ptr = static_cast<T>(rand() / static_cast<double>(RAND_MAX / range)) - (range / 2);
+            *ptr = base + delta;
         }
     }
 

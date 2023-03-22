@@ -19,22 +19,22 @@ public:
 private:
     Op query() final
     {
-        auto left_sym = _sym("left", tilt::Type(types::FLOAT32, _iter(0, -1)));
-        auto right_sym = _sym("right", tilt::Type(types::FLOAT32, _iter(0, -1)));
+        auto left_sym = _sym("left", tilt::Type(types::INT64, _iter(0, -1)));
+        auto right_sym = _sym("right", tilt::Type(types::INT64, _iter(0, -1)));
         return _Join(left_sym, right_sym, [](_sym left, _sym right) { return left + right; });
     }
 
     void init() final
     {
-        left_reg = create_reg<float>(size);
-        right_reg = create_reg<float>(size);
+        left_reg = create_reg<int64_t>(size);
+        right_reg = create_reg<int64_t>(size);
         float ratio = (float) max(lperiod, rperiod) / (float) min(lperiod, rperiod);
         int osize = size * ceil(ratio);
-        out_reg = create_reg<float>(osize);
+        out_reg = create_reg<int64_t>(osize);
 
-        SynthData<float> dataset_left(lperiod, size);
+        SynthData<int64_t> dataset_left(lperiod, size);
         dataset_left.fill(&left_reg);
-        SynthData<float> dataset_right(rperiod, size);
+        SynthData<int64_t> dataset_right(rperiod, size);
         dataset_right.fill(&right_reg);
     }
 
@@ -46,6 +46,11 @@ private:
 
     void release() final
     {
+#ifdef _PRINT_REGION_
+        print_reg<int64_t>(&left_reg, "join_left_reg.txt");
+        print_reg<int64_t>(&right_reg, "join_right_reg.txt");
+        print_reg<int64_t>(&out_reg, "join_out_reg.txt");
+#endif
         release_reg(&left_reg);
         release_reg(&right_reg);
         release_reg(&out_reg);
